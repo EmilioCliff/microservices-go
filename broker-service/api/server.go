@@ -6,6 +6,12 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+type JSONResponse struct {
+	Error   bool   `json:"error"`
+	Message string `json:"message"`
+	Data    string `json:"data,omitempty"`
+}
+
 type Server struct {
 	router *gin.Engine
 }
@@ -26,11 +32,20 @@ func (server *Server) setRoutes() {
 		ctx.JSON(http.StatusOK, gin.H{"message": "pong"})
 	})
 
-	router.POST("/handle", server.handleBroker)
+	router.POST("/", server.testBroker)
+	router.POST("/handler", server.handler)
 
 	server.router = router
 }
 
 func (server *Server) Start(addr string) error {
 	return server.router.Run(addr)
+}
+
+func errorResponse(err error, message string) JSONResponse {
+	return JSONResponse{
+		Error:   true,
+		Message: message,
+		Data:    err.Error(),
+	}
 }

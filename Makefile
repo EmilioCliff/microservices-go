@@ -1,5 +1,6 @@
 FRONT_END_BINARY=frontApp
 BROKER_BINARY=brokerApp
+AUTH_BINARY=authApp
 
 ## up: starts all containers in the background qitout forcing build
 up:
@@ -10,6 +11,7 @@ up:
 ## down: stop docker compose
 down:
 	@echo "Stopping docker compose"
+	docker-compose rm -f
 	docker-compose down
 	@echo "docker compose down done"
 
@@ -25,6 +27,12 @@ up_build:
 # build_broker:
 # 	@echo "Building broker binary"
 # 	cd ./broker-service && env GOOS=linux CGO_ENABLE=0 go build -o ${BROKER_BINARY} main.go
+# 	@echo "Done"
+
+# build_auth: builds the auth binary
+# build_auth:
+# 	@echo "Building auth binary"
+# 	cd ./authentication-service && env GOOS=linux CGO_ENABLE=0 go build -o ${AUTH_BINARY} main.go
 # 	@echo "Done"
 
 ## build_front: builds the front end binary
@@ -44,13 +52,17 @@ stop:
 	@-pkill -SIGTERM -f "./${FRONT_END_BINARY}"
 	@echo "Stopped front end"
 
+## sqlc: will generate our sqlc code
+sqlc:
+	cd authentication-service && sqlc generate
+
 ## postgres: creates a docker container with the credentials below
-postgres:
-	docker run --name auth-service -e POSTGRES_PASSWORD=verysecret -e POSTGRES_USER=admin -p 5432:5432 -d postgres:alpine3.19
+# postgres:
+# 	docker run --name auth-service -e POSTGRES_PASSWORD=verysecret -e POSTGRES_USER=admin -p 5432:5432 -d postgres:alpine3.19
 
 ## createdb: creates a new db in our container
-createdb:
-	docker exec -it auth-service createdb --username=root --owner=root authdb
+# createdb:
+# 	docker exec -it auth-service createdb --username=root --owner=root authdb
 
 ## dropdb: drops all data in our postgres container
 dropdb:
