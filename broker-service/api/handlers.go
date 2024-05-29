@@ -44,9 +44,21 @@ func (server *Server) testBroker(ctx *gin.Context) {
 }
 
 func (server *Server) handler(ctx *gin.Context) {
-	var req RequestPayload
-	if err := ctx.ShouldBindJSON(&req); err != nil {
-		ctx.JSON(http.StatusBadRequest, errorResponse(err, "bad request"))
+	// var req RequestPayload
+	// if err := ctx.ShouldBindJSON(&req); err != nil {
+	// 	ctx.JSON(http.StatusBadRequest, errorResponse(err, "bad request"))
+	// 	return
+	// }
+	set, exists := ctx.Get("payload")
+	if !exists {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get request payload"})
+		return
+	}
+
+	// Type assert to the correct type
+	req, ok := set.(RequestPayload)
+	if !ok {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Invalid request payload type"})
 		return
 	}
 
