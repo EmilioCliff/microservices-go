@@ -51,3 +51,43 @@ services:
       start_period: 80s  
     volumes:
       - ./db-data/postgres/:/var/lib/postgresql/data/
+
+  logger-service:
+    container_name: loggerApp
+    build:
+      context: ./logger-service
+      dockerfile: ./logger-service.dockerfile
+    environment:
+      - DB_URL=postgresql://admin:verysecret@log-postgres/loggerdb?sslmode=disable
+    deploy:
+      mode: replicated
+      replicas: 1
+    restart: always
+    depends_on:
+      log-postgres:
+        condition: service_healthy
+
+  log-postgres:
+    container_name: log-postgres
+    image: postgres:alpine3.19
+    ports:
+      - "5431:5432"
+    environment:
+      - POSTGRES_USER=admin
+      - POSTGRES_DB=loggerdb
+      - POSTGRES_PASSWORD=verysecret
+      - PGUSER=admin
+    deploy:
+      mode: replicated
+      replicas: 1
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready"]
+      interval: 30s
+      timeout: 60s
+      retries: 5
+      start_period: 80s  
+    volumes:
+      - ./db-data/log-postgres/:/var/lib/postgresql/data/
+    depends_on:
+      postgres:
+        condition: service_healthy

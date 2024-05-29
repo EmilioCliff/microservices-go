@@ -1,6 +1,7 @@
 FRONT_END_BINARY=frontApp
 BROKER_BINARY=brokerApp
 AUTH_BINARY=authApp
+LOGGER_BINARY=loggerApp
 
 ## up: starts all containers in the background qitout forcing build
 up:
@@ -35,6 +36,12 @@ up_build:
 # 	cd ./authentication-service && env GOOS=linux CGO_ENABLE=0 go build -o ${AUTH_BINARY} main.go
 # 	@echo "Done"
 
+# build_logger: builds the logger binary
+# build_logger:
+# 	@echo "Building logger binary"
+# 	cd ./logger-service && env GOOS=linux CGO_ENABLE=0 go build -o ${LOGGER_BINARY} main.go
+# 	@echo "Done"
+
 ## build_front: builds the front end binary
 build_front:
 	@echo "Building the front end binary"
@@ -55,6 +62,7 @@ stop:
 ## sqlc: will generate our sqlc code
 sqlc:
 	cd authentication-service && sqlc generate
+	cd logger-service && sqlc generate
 
 ## postgres: creates a docker container with the credentials below
 # postgres:

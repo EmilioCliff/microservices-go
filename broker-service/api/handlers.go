@@ -17,13 +17,21 @@ type JSONRequst struct {
 }
 
 type RequestPayload struct {
-	Action string      `json:"action"`
-	Auth   Authpayload `json:"auth,omitempty"`
+	Action string        `json:"action"`
+	Auth   Authpayload   `json:"auth,omitempty"`
+	Logger LoggerPayload `json:"logger,omitempty"`
 }
 
 type Authpayload struct {
 	Email    string `json:"email"`
 	Password string `json:"password"`
+}
+
+type LoggerPayload struct {
+	Email     string `json:"email"`
+	Data      string `json:"data"`
+	UserIP    string `json:"user_ip,omitempty"`
+	UserAgent string `json:"user_agent,omitempty"`
 }
 
 func (server *Server) testBroker(ctx *gin.Context) {
@@ -45,6 +53,10 @@ func (server *Server) handler(ctx *gin.Context) {
 	switch req.Action {
 	case "auth":
 		server.authenticate(ctx, req.Auth)
+
+	case "logger":
+		server.log(ctx, req.Logger)
+
 	default:
 		ctx.JSON(http.StatusBadRequest, JSONRequst{
 			Error:   true,
@@ -68,11 +80,6 @@ func (server *Server) authenticate(ctx *gin.Context, payload Authpayload) {
 		return
 	}
 	defer response.Body.Close()
-
-	// if err = json.NewDecoder(request.Body).Decode(&jsonFromService); err != nil {
-	// 	ctx.JSON(http.StatusInternalServerError, errorResponse(err, "could decode response"))
-	// 	return
-	// }
 
 	responseBody, err := io.ReadAll(response.Body)
 	if err != nil {
@@ -106,4 +113,40 @@ func (server *Server) authenticate(ctx *gin.Context, payload Authpayload) {
 			Data:    jsonFromService.Data,
 		})
 	}
+}
+
+func (server *Server) log(ctx *gin.Context, payload LoggerPayload) {
+	payload.UserAgent = ctx.Request.UserAgent()
+	payload.UserIP = ctx.ClientIP()
+	jsonData, _ := json.Marshal(payload)
+	request, err := http.NewRequest("POST", "http://loggerApp:5000/log", bytes.NewBuffer(jsonData))
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, errorResponse(err, "failed to create response"))
+		return
+	}
+
+	client := &http.Client{}
+	response, err := client.Do(request)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, errorResponse(err, "failed to send request"))
+		return
+	}
+
+	responseData, err := io.ReadAll(response.Body)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, errorResponse(err, "failed to read response"))
+		return
+	}
+
+	var req JSONRequst
+	if err := json.Unmarshal(responseData, &req); err != nil {
+		ctx.JSON(http.StatusInternalServerError, errorResponse(err, "failed to unmarshal response"))
+		return
+	}
+
+	ctx.JSON(http.StatusOK, JSONResponse{
+		Error:   false,
+		Message: req.Message,
+		Data:    req.Data,
+	})
 }
