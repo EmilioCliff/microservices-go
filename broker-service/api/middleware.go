@@ -47,6 +47,7 @@ func LogRequest() gin.HandlerFunc {
 			payload = req.Logger
 			payload.UserAgent = ctx.Request.UserAgent()
 			payload.UserIP = ctx.ClientIP()
+		} else if req.Action == "payment" {
 		}
 
 		jsonData, _ := json.Marshal(payload)

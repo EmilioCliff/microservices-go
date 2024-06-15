@@ -12,6 +12,21 @@ services:
       mode: replicated
       replicas: 1
 
+  payment-service:
+    container_name: paymentApp
+    build:
+      context: ./payment-service
+      dockerfile: ./payment-service.dockerfile
+    environment:
+      - STRIPE_SECRET_KEY=<stripe-secret-key>
+      - STRIPE_PUBLISHABLE_KEY=<stripe-publishable-key>
+      - PORT=5000
+    ports:
+      - "8083:5000"
+    deploy:
+      mode: replicated
+      replicas: 1
+
   authentication-service:
     container_name: authApp
     build:

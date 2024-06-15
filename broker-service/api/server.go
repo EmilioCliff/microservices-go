@@ -27,14 +27,14 @@ func (server *Server) setRoutes() {
 	router := gin.Default()
 
 	router.Use(CORSMiddleware())
-	logger := router.Group("/").Use(LogRequest())
+	// logger := router.Group("/").Use(LogRequest())
 
 	router.GET("/ping", func(ctx *gin.Context) {
 		ctx.JSON(http.StatusOK, gin.H{"message": "pong"})
 	})
 
 	router.POST("/", server.testBroker)
-	logger.POST("/handler", server.handler)
+	router.POST("/handler", server.handler)
 
 	server.router = router
 }
