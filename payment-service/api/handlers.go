@@ -67,7 +67,7 @@ func (server *Server) handleWebhook(c *gin.Context) {
 		return
 	}
 
-	endpointSecret := "whsec_15c4e50f8c6d4ad1a714cca17bea3a476b8b9ad0384945c81391d13b56ea7830"
+	endpointSecret := "<web-secret>"
 
 	event, err := webhook.ConstructEvent(payload, c.GetHeader("Stripe-Signature"),
 		endpointSecret)
