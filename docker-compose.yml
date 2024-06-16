@@ -6,6 +6,8 @@ services:
     build:
       context: ./broker-service
       dockerfile: ./broker-service.dockerfile
+    environment:
+      - RABBITMQ_URI=amqp://guest:guest@rabbitmq:5672
     ports:
       - "8080:5000"
     deploy:
@@ -17,10 +19,8 @@ services:
     build:
       context: ./payment-service
       dockerfile: ./payment-service.dockerfile
-    environment:
-      - STRIPE_SECRET_KEY=<stripe-secret-key>
-      - STRIPE_PUBLISHABLE_KEY=<stripe-publishable-key>
-      - PORT=5000
+    env_file:
+      - ./payment-service/.env
     ports:
       - "8083:5000"
     deploy:
@@ -106,3 +106,29 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+
+  rabbitmq:
+    container_name: rabbitmq
+    image: rabbitmq:3.13.3-management
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    volumes:
+      - ./rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf # Mount custom configuration file
+    environment:
+      - RABBITMQ_ERLANG_COOKIE=secretcookie # Shared secret for cluster communication
+      - RABBITMQ_NODENAME=rabbit@rabbitmq   # Unique node name within the cluster
+    deploy:
+      mode: replicated
+      replicas: 1
+
+  listener-service:
+    container_name: listenerApp
+    build:
+      context: ./listener-service
+      dockerfile: ./listener-service.dockerfile
+    environment:
+      - RABBITMQ_URI=amqp://guest:guest@rabbitmq:5672
+    deploy:
+      mode: replicated
+      replicas: 1

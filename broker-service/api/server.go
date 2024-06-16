@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	amqp "github.com/rabbitmq/amqp091-go"
 )
 
 type JSONResponse struct {
@@ -14,10 +15,12 @@ type JSONResponse struct {
 
 type Server struct {
 	router *gin.Engine
+	ch     *amqp.Channel
 }
 
-func NewServer() *Server {
+func NewServer(ch *amqp.Channel) *Server {
 	var server Server
+	server.ch = ch
 	server.setRoutes()
 
 	return &server

@@ -1,2 +1,6 @@
 __MACOSX
 .DS_Store
+
+**/*.env
+**/*.conf
+/db-data

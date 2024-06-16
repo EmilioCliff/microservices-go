@@ -68,7 +68,8 @@
         let sent = document.getElementById("payload");
         let received = document.getElementById("received");
 
-        loggerBtn.addEventListener('click', () => {
+        loggerBtn.addEventListener('click', (e) => {
+            e.preventDefault();
             const payload = {
                 action: 'logger',
                 logger: {

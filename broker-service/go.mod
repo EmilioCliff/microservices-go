@@ -2,7 +2,10 @@ module github.com/EmilioCliff/broker-service
 
 go 1.21.6
 
-require github.com/gin-gonic/gin v1.10.0
+require (
+	github.com/gin-gonic/gin v1.10.0
+	github.com/rabbitmq/amqp091-go v1.10.0
+)
 
 require (
 	github.com/bytedance/sonic v1.11.7 // indirect
