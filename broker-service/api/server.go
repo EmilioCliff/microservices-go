@@ -38,6 +38,7 @@ func (server *Server) setRoutes() {
 
 	router.POST("/", server.testBroker)
 	router.POST("/handler", server.handler)
+	router.POST("/webhook", server.handleWebhook)
 
 	server.router = router
 }

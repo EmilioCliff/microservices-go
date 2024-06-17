@@ -5,6 +5,7 @@ go 1.21.6
 require (
 	github.com/gin-gonic/gin v1.10.0
 	github.com/rabbitmq/amqp091-go v1.10.0
+	github.com/stripe/stripe-go/v78 v78.11.0
 )
 
 require (

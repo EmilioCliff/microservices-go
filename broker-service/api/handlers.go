@@ -4,10 +4,14 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
 	"net/http"
+	"os"
 
 	"github.com/gin-gonic/gin"
+	"github.com/stripe/stripe-go/v78"
+	"github.com/stripe/stripe-go/v78/webhook"
 )
 
 type JSONRequst struct {
@@ -77,6 +81,43 @@ func (server *Server) handler(ctx *gin.Context) {
 			Message: "unknown action",
 		})
 	}
+}
+
+func (server *Server) handleWebhook(c *gin.Context) {
+	const MaxBodyBytes = int64(65536)
+	c.Request.Body = http.MaxBytesReader(c.Writer, c.Request.Body, MaxBodyBytes)
+	payload, err := io.ReadAll(c.Request.Body)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error reading request body: %v\n", err)
+		c.Status(http.StatusServiceUnavailable)
+		return
+	}
+
+	endpointSecret := os.Getenv("WEBHOOK_SECRET")
+
+	event, err := webhook.ConstructEvent(payload, c.GetHeader("Stripe-Signature"),
+		endpointSecret)
+
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error verifying webhook signature: %v\n", err)
+		c.Status(http.StatusBadRequest)
+		return
+	}
+
+	switch event.Type {
+	case "payment_intent.succeeded":
+		var paymentIntent stripe.PaymentIntent
+		if err := json.Unmarshal(event.Data.Raw, &paymentIntent); err != nil {
+			fmt.Fprintf(os.Stderr, "Error parsing webhook JSON: %v\n", err)
+			c.Status(http.StatusBadRequest)
+			return
+		}
+		fmt.Printf("PaymentIntent was successful: %v\n", paymentIntent.ID)
+	default:
+		fmt.Fprintf(os.Stderr, "Unhandled event type: %s\n", event.Type)
+	}
+
+	c.Status(http.StatusOK)
 }
 
 func (server *Server) authenticate(ctx *gin.Context, payload Authpayload) {
@@ -162,33 +203,6 @@ func (server *Server) log(ctx *gin.Context, payload LoggerPayload) {
 		Error:   false,
 		Message: req.Message,
 		Data:    req.Data,
-	})
-}
-
-func (server *Server) logToRabit(ctx *gin.Context, payload LoggerPayload) {
-	payload.UserAgent = ctx.Request.UserAgent()
-	payload.UserIP = ctx.ClientIP()
-
-	j, err := json.Marshal(payload)
-	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, errorResponse(err, "could push to exchanger"))
-		return
-	}
-
-	p := rabbitPayload{
-		Name: "log",
-		Data: string(j),
-	}
-	err = server.Publish("log", p, Medium)
-	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, errorResponse(err, "could push to exchanger"))
-		return
-	}
-
-	ctx.JSON(http.StatusOK, JSONResponse{
-		Error:   false,
-		Message: "logged via rabbitMQ",
-		Data:    "rabbitmq successful",
 	})
 }
 

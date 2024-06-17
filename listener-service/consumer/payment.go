@@ -7,9 +7,8 @@ import (
 	"net/http"
 )
 
-func paymentEvent(event Payload) error {
-	jsonData, _ := json.Marshal(event)
-	request, err := http.NewRequest("POST", "http://paymentApp:5000/create-payment-intent", bytes.NewBuffer(jsonData))
+func paymentEvent(event string) error {
+	request, err := http.NewRequest("POST", "http://paymentApp:5000/create-payment-intent", bytes.NewBuffer([]byte(event)))
 	if err != nil {
 		return err
 	}

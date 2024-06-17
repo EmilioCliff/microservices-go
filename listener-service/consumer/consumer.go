@@ -101,7 +101,7 @@ func handlePayload(payload Payload) error {
 		}
 
 	case "payment":
-		err := paymentEvent(payload)
+		err := paymentEvent(payload.Data)
 		if err != nil {
 			return err
 		}
