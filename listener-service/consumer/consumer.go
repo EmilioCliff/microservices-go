@@ -59,7 +59,7 @@ func (consumer *Consumer) Listen(topics []string) error {
 		}
 	}
 
-	messages, err := ch.Consume(q.Name, "", true, false, false, false, nil)
+	messages, err := ch.Consume(q.Name, "", false, false, false, false, nil)
 
 	forever := make(chan bool)
 
@@ -94,7 +94,6 @@ func (consumer *Consumer) Listen(topics []string) error {
 func handlePayload(payload Payload) error {
 	switch payload.Name {
 	case "log":
-		log.Println("In log")
 		err := logEvent(payload.Data)
 		if err != nil {
 			return err

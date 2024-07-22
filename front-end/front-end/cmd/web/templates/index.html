@@ -27,11 +27,11 @@
             </div>
             <form id="payment-form" class="hidden">
                 <div id="payment-element">
-                    <!--Stripe.js injects the Payment Element-->
+                    
                 </div>
                 <button id="submit">
                     <div class="spinner hidden" id="spinner"></div>
-                    <span id="button-text">Pay now</span>
+                    <span id="button-text" class="btn btn-outline-success pay-hidden" style="display: none;">Pay now</span>
                 </button>
                 <div id="payment-message" class="hidden"></div>
             </form>
@@ -58,8 +58,6 @@
                 </div>
             </div>
         </div>
-        <!-- <script src="../js/checkout.js"></script> -->
-        <script src="./checkput.js"></script>
     <script>
         let brokerBtn = document.getElementById("brokerBtn");
         let authBtn = document.getElementById("authBtn");
@@ -164,5 +162,7 @@
             });
         });
     </script>
+    <script src="./checkput.js"></script>
+    <!-- <script src="../js/checkout.js"></script> -->
     </body>
 </html>

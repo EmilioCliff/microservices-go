@@ -16,6 +16,13 @@ paymentBtn.addEventListener('click', () => {
     .then((data) => {
         stripe = Stripe(data.publishable_key)
         initialize();
+
+        console.log("here")
+        document.querySelector(".pay-hidden").style.display = "block";
+        document
+          .querySelector("#payment-form")
+          .addEventListener("submit", handleSubmit);
+        
     })
     .catch((error) => {
         output.innerHTML =  "<br><br>Error:" + error;
@@ -23,10 +30,6 @@ paymentBtn.addEventListener('click', () => {
   })
 
 let elements;
-
-document
-  .querySelector("#payment-form")
-  .addEventListener("submit", handleSubmit);
 
 // Fetches a payment intent and captures the client secret
 async function initialize() {
@@ -63,7 +66,7 @@ async function handleSubmit(e) {
   const { error } = await stripe.confirmPayment({
     elements,
     confirmParams: {
-      return_url: "http://localhost:5500/front-end/front-end/cmd/web/templates/checkout.html",
+      return_url: "http://localhost:8082/checkout",
     },
   });
 

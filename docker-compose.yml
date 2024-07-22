@@ -114,10 +114,10 @@ services:
       - "5672:5672"
       - "15672:15672"
     volumes:
-      - ./rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf # Mount custom configuration file
+      - ./rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf
     environment:
-      - RABBITMQ_ERLANG_COOKIE=secretcookie # Shared secret for cluster communication
-      - RABBITMQ_NODENAME=rabbit@rabbitmq   # Unique node name within the cluster
+      - RABBITMQ_ERLANG_COOKIE=secretcookie
+      - RABBITMQ_NODENAME=rabbit@rabbitmq  
     deploy:
       mode: replicated
       replicas: 1
