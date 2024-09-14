@@ -52,6 +52,18 @@ You'll need to create a random user in the authentication postgres db.
    docker compose up
    ```
 
+4. **Making Request**
+   We now cd into the frontend and start the sever with the following command
+
+   ```
+      cd ./front-end/front-end/cmd/web
+      go run main.go
+   ```
+
+   We then go to `localhost:8082`
+
+   With everything set up we can now start testing our services...😄
+
 ## Remarks 🤝
 
 Happy Coding
