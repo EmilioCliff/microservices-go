@@ -63,6 +63,7 @@ func (server *Server) handler(ctx *gin.Context) {
 	switch req.Action {
 	case "auth":
 		server.authenticate(ctx, req.Auth)
+		// server.logToRabit(ctx, req.Logger)
 
 	case "logger":
 		// server.log(ctx, req.Logger)
@@ -81,6 +82,43 @@ func (server *Server) handler(ctx *gin.Context) {
 			Message: "unknown action",
 		})
 	}
+}
+
+func (server *Server) handleWebhook(c *gin.Context) {
+	const MaxBodyBytes = int64(65536)
+	c.Request.Body = http.MaxBytesReader(c.Writer, c.Request.Body, MaxBodyBytes)
+	payload, err := io.ReadAll(c.Request.Body)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error reading request body: %v\n", err)
+		c.Status(http.StatusServiceUnavailable)
+		return
+	}
+
+	endpointSecret := os.Getenv("WEBHOOK_SECRET")
+
+	event, err := webhook.ConstructEvent(payload, c.GetHeader("Stripe-Signature"),
+		endpointSecret)
+
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error verifying webhook signature: %v\n", err)
+		c.Status(http.StatusBadRequest)
+		return
+	}
+
+	switch event.Type {
+	case "payment_intent.succeeded":
+		var paymentIntent stripe.PaymentIntent
+		if err := json.Unmarshal(event.Data.Raw, &paymentIntent); err != nil {
+			fmt.Fprintf(os.Stderr, "Error parsing webhook JSON: %v\n", err)
+			c.Status(http.StatusBadRequest)
+			return
+		}
+		fmt.Printf("PaymentIntent was successful: %v\n", paymentIntent.ID)
+	default:
+		fmt.Fprintf(os.Stderr, "Unhandled event type: %s\n", event.Type)
+	}
+
+	c.Status(http.StatusOK)
 }
 
 func (server *Server) authenticate(ctx *gin.Context, payload Authpayload) {
@@ -239,41 +277,4 @@ func (server *Server) processPayment(ctx *gin.Context, payload PaymentPayload) {
 	}
 
 	ctx.JSON(http.StatusOK, jsonFromService)
-}
-
-func (server *Server) handleWebhook(c *gin.Context) {
-	const MaxBodyBytes = int64(65536)
-	c.Request.Body = http.MaxBytesReader(c.Writer, c.Request.Body, MaxBodyBytes)
-	payload, err := io.ReadAll(c.Request.Body)
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error reading request body: %v\n", err)
-		c.Status(http.StatusServiceUnavailable)
-		return
-	}
-
-	endpointSecret := os.Getenv("WEBHOOK_SECRET")
-
-	event, err := webhook.ConstructEvent(payload, c.GetHeader("Stripe-Signature"),
-		endpointSecret)
-
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error verifying webhook signature: %v\n", err)
-		c.Status(http.StatusBadRequest)
-		return
-	}
-
-	switch event.Type {
-	case "payment_intent.succeeded":
-		var paymentIntent stripe.PaymentIntent
-		if err := json.Unmarshal(event.Data.Raw, &paymentIntent); err != nil {
-			fmt.Fprintf(os.Stderr, "Error parsing webhook JSON: %v\n", err)
-			c.Status(http.StatusBadRequest)
-			return
-		}
-		fmt.Printf("PaymentIntent was successful: %v\n", paymentIntent.ID)
-	default:
-		fmt.Fprintf(os.Stderr, "Unhandled event type: %s\n", event.Type)
-	}
-
-	c.Status(http.StatusOK)
 }

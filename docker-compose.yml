@@ -1,4 +1,4 @@
-version: '3.9'
+version: "3.9"
 
 services:
   broker-service:
@@ -34,8 +34,6 @@ services:
       dockerfile: ./authentication-service.dockerfile
     environment:
       - DB_URL=postgresql://postgres:secret@postgres:5432/authdb?sslmode=disable
-    ports:
-      - "8081:5000"
     restart: always
     deploy:
       mode: replicated
@@ -63,7 +61,7 @@ services:
       interval: 30s
       timeout: 60s
       retries: 5
-      start_period: 80s  
+      start_period: 80s
     volumes:
       - ./db-data/postgres/:/var/lib/postgresql/data/
 
@@ -100,7 +98,7 @@ services:
       interval: 30s
       timeout: 60s
       retries: 5
-      start_period: 80s  
+      start_period: 80s
     volumes:
       - ./db-data/log-postgres/:/var/lib/postgresql/data/
     depends_on:
@@ -117,7 +115,7 @@ services:
       - ./rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf
     environment:
       - RABBITMQ_ERLANG_COOKIE=secretcookie
-      - RABBITMQ_NODENAME=rabbit@rabbitmq  
+      - RABBITMQ_NODENAME=rabbit@rabbitmq
     deploy:
       mode: replicated
       replicas: 1
