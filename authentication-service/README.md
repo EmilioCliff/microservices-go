@@ -5,7 +5,7 @@ Welcome to the **Authentication Service**! This microservice is part of the larg
 ## Endpoints ✨
 
 - Feature 1
-  `GET    /ping` used to test if the server is up and healthy
+  `GET    /ping` used to test if the server is up and healthy  
   `POST     /authenticate` used to authenticate credentials sent
 
 ## Technologies Used 🛠️
