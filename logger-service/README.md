@@ -4,9 +4,8 @@ Welcome to the **Logger Service**! This microservice is part of the larger Go Mi
 
 ## Endpoints ✨
 
-- Feature 1
-  `GET    /ping` used to test if the server is up and healthy  
-  `POST     /log` used to log the request into the database
+`GET    /ping` used to test if the server is up and healthy  
+ `POST     /log` used to log the request into the database
 
 ## Technologies Used 🛠️
 

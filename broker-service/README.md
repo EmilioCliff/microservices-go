@@ -4,10 +4,9 @@ Welcome to the **Broker Service**! This microservice is part of the larger Go Mi
 
 ## Endpoints ✨
 
-- Feature 1
-  `GET    /ping` used to test if the service is up and healthy  
-  `POST     /handler` used to receive the clients request and route to respective services using either the rabbit queue or http request  
-  `POST     /webhook` used together with the payment api for stripe callbacks
+`GET    /ping` used to test if the service is up and healthy  
+ `POST     /handler` used to receive the clients request and route to respective services using either the rabbit queue or http request  
+ `POST     /webhook` used together with the payment api for stripe callbacks
 
 ## Technologies Used 🛠️
 
